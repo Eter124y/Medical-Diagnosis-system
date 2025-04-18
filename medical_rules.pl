@@ -1,0 +1,96 @@
+% Comprehensive facts for
+% diseases(name,causes,symptoms,prevention,treatment)
+disease_overview('flu',
+    'Influenza virus, close contact with infected people.',
+    'Fever, cough, sore throat, muscle aches.',
+    'Wash hands regularly, avoid close contact with sick people, get vaccinated annually.',
+    'Rest, drink fluids, over-the-counter medication for fever.'
+).
+
+disease_overview('diabetes',
+    'Insulin resistance, genetics, obesity, and lifestyle factors.',
+    'Increased thirst, frequent urination, fatigue, and blurred vision.',
+    'Maintain a healthy weight, regular exercise, and a balanced diet.',
+    'Insulin therapy, oral medications.'
+).
+
+disease_overview('cancer',
+    'Genetic mutations, smoking, poor diet, exposure to carcinogens.',
+    'Unexplained weight loss, fatigue, pain, lumps.',
+    'Avoid smoking, limit alcohol consumption, maintain a healthy weight, regular screenings.',
+    'Chemotherapy, radiation therapy, surgery.'
+).
+
+disease_overview('hypertension',
+    'Obesity, lack of exercise, poor diet, stress, family history.',
+    'Headaches, dizziness, shortness of breath, chest pain.',
+    'Eat a balanced diet, exercise regularly, manage stress, avoid excessive alcohol and salt.',
+    'Blood pressure-lowering medications, lifestyle changes.'
+).
+
+disease_overview('asthma',
+    'Allergens, air pollution, respiratory infections.',
+    'Wheezing, shortness of breath, chest tightness, coughing.',
+    'Avoid triggers, use inhalers, follow prescribed medication regimen.',
+    'Inhaled corticosteroids, bronchodilators.'
+).
+
+disease_overview('arthritis',
+    'Age, genetics, joint injury, obesity.',
+    'Joint pain, swelling, stiffness, difficulty moving joints.',
+    'Exercise, weight management, anti-inflammatory medication.',
+    'Pain relievers, disease-modifying antirheumatic drugs (DMARDs).'
+).
+
+disease_overview('malaria',
+    'Mosquito bites, infected mosquitoes carrying Plasmodium parasite.',
+    'Fever, chills, sweating, headaches, nausea.',
+    'Use insect repellent, sleep under mosquito nets, take antimalarial medication.',
+    'Antimalarial drugs (e.g., chloroquine, artemisinin).'
+).
+
+disease_overview('tuberculosis',
+    'Bacterial infection, spread through airborne droplets.',
+    'Cough, chest pain, fatigue, fever, weight loss.',
+    'Complete the prescribed course of antibiotics, avoid close contact with infected individuals.',
+    'Long-term antibiotics (e.g., rifampicin, isoniazid).'
+).
+
+disease_overview('pneumonia',
+    'Bacterial or viral infection of the lungs.',
+    'Cough, chest pain, fever, difficulty breathing, fatigue.',
+    'Vaccination, avoid smoking, practice good hygiene.',
+    'Antibiotics, antiviral drugs, rest.'
+).
+
+disease_overview('hepatitis',
+    'Viral infections (hepatitis A, B, C), alcohol abuse, drug use.',
+    'Fatigue, nausea, abdominal pain, jaundice.',
+    'Vaccination (for hepatitis A and B), avoid alcohol, safe practices to avoid hepatitis C transmission.',
+    'Antiviral medications (for hepatitis B and C), liver transplant (for severe cases).'
+).
+:- dynamic user_profile/6.
+
+% user_profile(Username, Name, Email, Age, Gender, MedicalHistory).
+% user_profile(Username, Name, Email, Age, Gender, MedicalHistory).
+user_profile('admin', 'Grace', 'admin@gmail.com', 20, 'Male', ['diabetes', 'hypertension']).
+user_profile('john_smith', 'John Smith', 'john.smith@gmail.com', 35, 'Male', ['arthritis']).
+user_profile('emma_brown', 'Emma Brown', 'emma.brown@yahoo.com', 42, 'Female', ['hypertension', 'diabetes']).
+user_profile('li_wei', 'Li Wei', 'li.wei@hotmail.com', 30, 'Male', ['asthma', 'malaria']).
+user_profile('sophia_lee', 'Sophia Lee', 'sophia.lee@gmail.com', 25, 'Female', ['tuberculosis']).
+user_profile('michael_jones', 'Michael Jones', 'michael.jones@outlook.com', 50, 'Male', ['cancer']).
+
+
+
+% Valid User Credentials
+% valid_user(Username, Password).
+valid_user('admin', 'password').
+valid_user('john_smith', 'johnpass').
+valid_user('emma_brown', 'emmapass').
+valid_user('li_wei', 'liweipass').
+valid_user('sophia_lee', 'sophiapass').
+valid_user('michael_jones', 'michaelpass').
+
+
+
+

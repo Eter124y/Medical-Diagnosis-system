@@ -1,0 +1,205 @@
+:- use_module(library(http/thread_httpd)).
+:- use_module(library(http/http_dispatch)).
+:- use_module(library(http/html_write)).
+:- use_module(library(http/http_parameters)).
+
+% Load your Prolog facts and rules file
+:- consult('medical_rules.pl'). % Assumes valid_user/2 and user_profile/6 are defined here
+
+% Start the server
+:- initialization(start_server).
+start_server :-
+    http_server(http_dispatch, [port(8080)]),
+    writeln('Server started on http://localhost:8080').
+
+% Serve static files (images, css, etc.)
+
+% Handlers
+:- http_handler(root(.), redirect_to_login, []).
+:- http_handler(root(login), handle_login, []).
+:- http_handler(root(view_profile), handle_view_profile, []).
+:- http_handler(root(edit_profile), handle_edit_profile, []).
+:- http_handler(root(update_profile), handle_update_profile, []).
+:- http_handler(root(dashboard), handle_dashboard, []).
+:- http_handler(root(disease_overview_query), handle_disease_overview_query, []).
+:- http_handler(root(process_disease_overview_query), handle_disease_overview_query_result, []).
+
+% Redirect to Login with Image
+redirect_to_login(_Request) :-
+    reply_html_page(
+        title('Login'),
+        [
+            h1(' Medical Diagnosis System'),
+            p('Please login to continue.'),
+            \html_requires('login.html') % Include the login HTML
+        ]
+    ).
+
+% Handle Login
+handle_login(Request) :-
+    http_parameters(Request, [username(Username, [atom]), password(Password, [atom])]),
+    (   valid_user(Username, Password) ->
+        user_profile(Username, Name, _, _, _, _),
+        format(string(DashboardUrl), '/dashboard?username=~w', [Username]),
+        reply_html_page(
+            title('Dashboard'),
+            [
+                h1(['Welcome, ', Name]),
+                p('You are now logged in.'),
+                a(href=DashboardUrl, 'Go to Dashboard')
+            ]
+        )
+    ;   reply_html_page(
+            title('Login Failed'),
+            [
+                h1('Login Failed'),
+                p('Invalid username or password. Please try again.'),
+                a(href='/', 'Back to Login')
+            ]
+        )
+    ).
+
+% Dashboard
+handle_dashboard(Request) :-
+    http_parameters(Request, [username(Username, [atom])]),
+    user_profile(Username, Name, _, _, _, _),
+    reply_html_page(
+        title('Dashboard'),
+        [
+            h1(['Hi, ', Name]),
+            a(href='/view_profile?username=~w' - [Username], 'View Profile'),
+            br([]),br([]),
+
+            a(href='/disease_overview_query', 'Query Disease Overview')
+        ]
+    ).
+
+% View Profile
+handle_view_profile(Request) :-
+    http_parameters(Request, [username(Username, [atom])]),
+    (   user_profile(Username, Name, Email, Age, Gender, MedicalHistory) ->
+        reply_html_page(
+            title('User Profile'),
+            [
+                h1(['Profile of ', Name]),
+                br([]),
+                p(['Name: ', Name]),
+                 br([]),
+                p(['Email: ', Email]),
+                 br([]),
+                p(['Age: ', Age]),
+                 br([]),
+                p(['Gender: ', Gender]),
+                 br([]),
+                p(['Medical History: ', MedicalHistory]),
+                 br([]),
+                a(href='/edit_profile?username=~w' - [Username], 'Edit Profile'),
+                br([]),
+                a(href='/dashboard?username=~w' - [Username], 'Back to Dashboard')
+            ]
+        )
+    ;   reply_html_page(
+            title('Error'),
+            [
+                h1('Profile Not Found'),
+                p('No profile data found. Please try logging in again.'),
+                a(href='/', 'Back to Login')
+            ]
+        )
+    ).
+
+% Edit Profile
+handle_edit_profile(Request) :-
+    http_parameters(Request, [username(Username, [atom])]),
+    user_profile(Username, Name, Email, Age, Gender, MedicalHistory),
+    reply_html_page(
+        title('Edit Profile'),
+        [
+            h1('Edit Your Profile'),
+            form([action='/update_profile', method='POST'], [
+                input([type=hidden, name=username, value=Username]),
+
+                label([for=name], 'Name: '), input([type=text, name=name, value=Name]), br([]),
+                label([for=email], 'Email: '), input([type=email, name=email, value=Email]), br([]),
+                label([for=age], 'Age: '), input([type=number, name=age, value=Age]), br([]),
+                label([for=gender], 'Gender: '), input([type=text, name=gender, value=Gender]), br([]),
+                label([for=medical_history], 'Medical History: '),
+                textarea([name=medical_history], MedicalHistory), br([]),
+                input([type=submit, value='Update'])
+            ])
+        ]
+    ).
+
+% Update Profile
+handle_update_profile(Request) :-
+    http_parameters(Request, [
+        username(Username, [atom]),
+
+        name(Name, [atom]),
+
+        email(Email, [atom]),
+
+        age(Age, [integer]),
+
+
+        gender(Gender, [atom]),
+        medical_history(MedicalHistory, [atom])
+    ]),
+    retractall(user_profile(Username, _, _, _, _, _)),  % Retract existing profile
+    assertz(user_profile(Username, Name, Email, Age, Gender, MedicalHistory)),  % Assert the updated profile
+    format(string(ProfileUrl), '/view_profile?username=~w', [Username]),
+    reply_html_page(
+        title('Profile Updated'),
+        [
+
+            h1('Profile Updated Successfully'),
+            a(href=ProfileUrl, 'View Profile'),
+            br([]),
+            a(href='/dashboard?username=~w' - [Username], 'Back to Dashboard')
+        ]
+
+    ).
+
+% Disease Overview Query
+handle_disease_overview_query(_Request) :-
+    reply_html_page(
+        title('Disease Overview Query'),
+        [
+            h1('Disease Overview Query'),
+            form([action='/process_disease_overview_query', method='POST'], [
+                label([for=disease], 'Disease: '),
+                input([type=text, name=disease, id=disease]), br([]),
+                input([type=submit, value='Submit'])
+            ])
+        ]
+    ).
+
+% Process Disease Overview Query
+handle_disease_overview_query_result(Request) :-
+    http_parameters(Request, [disease(Disease, [atom])]),
+    (   disease_overview(Disease, Causes, Symptoms, Prevention, Treatment) ->
+        reply_html_page(
+            title('Disease Overview Query Result'),
+            [
+                h1('Disease Overview Query Result'),
+                p(['Disease: ', Disease]),
+                p(['Causes: ', Causes]),
+                p(['Symptoms: ', Symptoms]),
+                p(['Prevention: ', Prevention]),
+                p(['Treatment: ', Treatment]), % Display the treatment option
+                a(href='/disease_overview_query', 'Back to Disease Overview Query')
+            ]
+        )
+    ;   reply_html_page(
+            title('Disease Overview Query Result'),
+            [
+                h1('Disease Overview Query Result'),
+                p(['No information found for disease: ', Disease]),
+                a(href='/disease_overview_query', 'Back to Disease Overview Query')
+            ]
+        )
+    ).
+
+
+
+
